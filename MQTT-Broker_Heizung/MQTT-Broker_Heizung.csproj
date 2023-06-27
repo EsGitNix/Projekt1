@@ -19,11 +19,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-beta.801" />
 		<PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="NewFolder\" />
 	</ItemGroup>
 
 </Project>
