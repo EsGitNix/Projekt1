@@ -107,12 +107,11 @@
                     <RowDefinition Height="15"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <TextBlock HorizontalAlignment="Center">Hier Steht irgendwas</TextBlock>
+                <TextBlock HorizontalAlignment="Center">Luftfeuchtigkeit</TextBlock>
                 <lvc:CartesianChart Grid.Row="1" Series="{Binding MeineSerie}" ZoomMode="Both"/>
-                <TextBlock Grid.Row="2" HorizontalAlignment="Center">Hier Steht irgendwas2</TextBlock>
+                <TextBlock Grid.Row="2" HorizontalAlignment="Center">Temperatur</TextBlock>
                 <lvc:CartesianChart Grid.Row="3" Series="{Binding MeineSerie2}" ZoomMode="Both"/>
             </Grid>
-
         </DockPanel>
     </Grid>
 </Window>

@@ -17,7 +17,6 @@ namespace MQTT_Broker_Heizung
     {
         public List<ISeries> MeineSerie { get; private set; } // Eigenschaft an die gebunden wird
         public List<ISeries> MeineSerie2 { get; private set; } // Eigenschaft an die gebunden wird
-        Random rnd = new Random();
 
         public ViewModel()
         {
@@ -32,6 +31,7 @@ namespace MQTT_Broker_Heizung
 
         private LineSeries<ObservablePoint> FülleValuesSinus(int anzahl)
         {
+            Random rnd = new Random();
             double offset = rnd.NextDouble() + 0.5;
             double amplitude = 10.0 * offset;
             const double frequency = 50.0;
