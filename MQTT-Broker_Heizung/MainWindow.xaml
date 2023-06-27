@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MQTT_Broker_Heizung"
+        xmlns:local="clr-namespace:MQTT_Broker_Heizung"        
+        xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF"
         mc:Ignorable="d"
         Title="MainWindow" Height="750" Width="1250"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -16,6 +17,10 @@
         FontFamily="{DynamicResource MaterialDesignFont}"
         Icon="/icon/icon.png">
 
+    <Window.DataContext>
+        <local:ViewModel/>
+    </Window.DataContext>
+
     <Window.Resources>
         <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}" >
             <Setter Property="IsEnabled" Value="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"/>
@@ -26,6 +31,8 @@
             <Setter Property="Stretch" Value="Fill"/>
         </Style>
     </Window.Resources>
+
+
 
     <Grid>
         <DockPanel>
@@ -66,8 +73,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Button>test</Button>
-
+                    <Button HorizontalAlignment="Left">test</Button>
                 </Grid>
             </Grid>
             <!--left-->
@@ -90,13 +96,18 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
+                    <Button>test</Button>
                 </Grid>
             </Grid>
             <!--center-->
-            <StackPanel >
-
-
-            </StackPanel>
+            <Grid >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="15"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock HorizontalAlignment="Center">Hier Steht irgendwas</TextBlock>
+                <lvc:CartesianChart Grid.Row="1" Series="{Binding MeineSerie}" ZoomMode="Both"/>
+            </Grid>
 
         </DockPanel>
     </Grid>
