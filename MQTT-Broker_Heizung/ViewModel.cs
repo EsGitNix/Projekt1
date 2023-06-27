@@ -16,19 +16,22 @@ namespace MQTT_Broker_Heizung
     class ViewModel
     {
         public List<ISeries> MeineSerie { get; private set; } // Eigenschaft an die gebunden wird
+        public List<ISeries> MeineSerie2 { get; private set; } // Eigenschaft an die gebunden wird
+        Random rnd = new Random();
 
         public ViewModel()
         {
             MeineSerie = new List<ISeries>(); // Hier im Demo nur eine Serie
+            MeineSerie2 = new List<ISeries>(); // Hier im Demo nur eine Serie
             LineSeries<ObservablePoint> sinusSerie = FülleValuesSinus(9);
             LineSeries<ObservablePoint> sinusSerie2 = FülleValuesSinus(13);
+            sinusSerie2.Stroke = new SolidColorPaint(SKColors.Red, 2);
             MeineSerie.Add(sinusSerie);
-            MeineSerie.Add(sinusSerie2);
+            MeineSerie2.Add(sinusSerie2);
         }
 
         private LineSeries<ObservablePoint> FülleValuesSinus(int anzahl)
         {
-            Random rnd = new Random();
             double offset = rnd.NextDouble() + 0.5;
             double amplitude = 10.0 * offset;
             const double frequency = 50.0;
