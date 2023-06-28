@@ -27,6 +27,13 @@ const long gmtOffset_sec = 3600;
 const int daylightOffset_sec = 3600;
 char csvSperator = ';';
 
+WiFiClient espClient;
+PubSubClient mqttClient(espClient);
+const int mqqtPort = 1883;
+const char *broker = "192.168.68.109";
+
+const char *topicHeizung = "/heizung";
+
 float batteryPercantage()
 {
   int input = (analogRead(batteryPin));
@@ -68,13 +75,23 @@ void showSCrn()
   tft.println(localTime());
 }
 
+void connectMQTT()
+{
+  while (!mqttClient.connected())
+  {
+    Serial.println("Connecting mqtt... ");
+    mqttClient.connect("ESP32");
+    mqttClient.subscribe(topicHeizung);
+    delay(500);
+  }
+}
 void setup()
 {
   Serial.begin(9600);
   while (!Serial)
   {
     ;
-  }  
+  }
   int counter = 0;
   dht.begin();
   tft.begin();
@@ -95,6 +112,10 @@ void setup()
   Serial.println(localTime());
 
   pinMode(batteryPin, INPUT);
+  //////////////////TODO//////////////////////////////////////
+  mqttClient.setServer(broker, mqqtPort);
+  connectMQTT();
+  mqttClient.publish("testlol", "hiersteht was");
 }
 
 void loop()
