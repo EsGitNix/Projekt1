@@ -29,6 +29,9 @@ char csvSperator = ';';
 
 float batteryPercantage()
 {
+  int input = (analogRead(batteryPin));
+  float percantage = map(input, 1000, 4095, 0.0, 100.00);
+  return percantage;
 }
 
 String localTime()
@@ -71,9 +74,7 @@ void setup()
   while (!Serial)
   {
     ;
-  }
-  pinMode(batteryPin, INPUT);
-
+  }  
   int counter = 0;
   dht.begin();
   tft.begin();
@@ -92,6 +93,8 @@ void setup()
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer); // Set the time server
   Serial.print("Time set: ");
   Serial.println(localTime());
+
+  pinMode(batteryPin, INPUT);
 }
 
 void loop()
@@ -99,4 +102,6 @@ void loop()
   showSCrn();
   String dataString = localTime() + csvSperator + temperature + csvSperator + humidity;
   Serial.println(dataString);
+  Serial.println(batteryPercantage());
+  delay(1000);
 }
