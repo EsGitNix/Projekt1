@@ -33,11 +33,14 @@ const int mqqtPort = 1883;
 const char *broker = "192.168.68.109";
 
 const char *topicHeizung = "/heizung";
+const char *topicHumid = "/feucht";
+const char *topicTemper = "/temper";
+const char *topicBattery = "/batterie";
 
 float batteryPercantage()
 {
   int input = (analogRead(batteryPin));
-  float percantage = map(input, 1000, 4095, 0.0, 100.00);
+  float percantage = map(input, 0, 4095, 0.0, 100.00);
   return percantage;
 }
 
@@ -77,13 +80,31 @@ void showSCrn()
 
 void connectMQTT()
 {
-  while (!mqttClient.connected())
+  for (size_t i = 0; i < 5; i++)
   {
-    Serial.println("Connecting mqtt... ");
-    mqttClient.connect("ESP32");
-    mqttClient.subscribe(topicHeizung);
-    delay(500);
+    if (!mqttClient.connected())
+    {
+      Serial.println("Connecting mqtt... ");
+      mqttClient.connect("ESP32");
+      mqttClient.subscribe(topicHeizung);
+      delay(500);
+    }
+    else
+    {
+      return;
+    }
   }
+  Serial.println("Connecting failed");
+}
+void publish()
+{
+  String batt = String(batteryPercantage(), 2);
+  String hum = String(humidity, 2);
+  String temper = String(temperature, 2);
+  mqttClient.publish(topicBattery, batt.c_str());
+  mqttClient.publish(topicHeizung, "kommtnoch");
+  mqttClient.publish(topicHumid, hum.c_str());
+  mqttClient.publish(topicTemper, temper.c_str());
 }
 void setup()
 {
@@ -115,7 +136,6 @@ void setup()
   //////////////////TODO//////////////////////////////////////
   mqttClient.setServer(broker, mqqtPort);
   connectMQTT();
-  mqttClient.publish("testlol", "hiersteht was");
 }
 
 void loop()
@@ -124,5 +144,15 @@ void loop()
   String dataString = localTime() + csvSperator + temperature + csvSperator + humidity;
   Serial.println(dataString);
   Serial.println(batteryPercantage());
+
+  if (!mqttClient.connected())
+  {
+    connectMQTT();
+  }
+  else
+  {
+    publish();
+  }
+
   delay(1000);
 }
