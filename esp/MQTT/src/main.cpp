@@ -15,6 +15,7 @@ const char *password = "rhQ6WbSbE8Rv"; //"123456789";
 
 const int dhtpin = 25;
 const int batteryPin = 39;
+const int heizungPin = 32;
 
 DHT dht(dhtpin, DHT22);
 TFT_eSPI tft = TFT_eSPI();
@@ -36,6 +37,7 @@ const char *topicHeizung = "/heizung";
 const char *topicHumid = "/feucht";
 const char *topicTemper = "/temper";
 const char *topicBattery = "/batterie";
+bool heizungAn = false;
 
 float batteryPercantage()
 {
@@ -77,7 +79,42 @@ void showSCrn()
   tft.setTextSize(2);
   tft.println(localTime());
 }
+void subscribe()
+{
+  if (true)
+  {
+    mqttClient.subscribe(topicHeizung);
+    mqttClient.subscribe("test");
+  }
+}
+void heizung(char *topic, byte *payload, unsigned int length)
+{
 
+  String msg;
+  for (byte i = 0; i < length; i++)
+  {
+    char tmp = char(payload[i]);
+    msg += tmp;
+  }
+  Serial.print(msg);
+  Serial.println(topic);
+  if (strcmp(topic, topicHeizung) == 0)
+  {
+    if (msg == "1" || msg == "true")
+    {
+      heizungAn = true;
+    }
+    else if (msg == "0" || msg == "false")
+    {
+      heizungAn = false;
+    }
+    else
+    {
+      Serial.println("invalid input");
+    }
+  }
+  digitalWrite(heizungPin, heizungAn);
+}
 void connectMQTT()
 {
   for (size_t i = 0; i < 5; i++)
@@ -102,7 +139,6 @@ void publish()
   String hum = String(humidity, 2);
   String temper = String(temperature, 2);
   mqttClient.publish(topicBattery, batt.c_str());
-  mqttClient.publish(topicHeizung, "kommtnoch");
   mqttClient.publish(topicHumid, hum.c_str());
   mqttClient.publish(topicTemper, temper.c_str());
 }
@@ -133,9 +169,11 @@ void setup()
   Serial.println(localTime());
 
   pinMode(batteryPin, INPUT);
-  //////////////////TODO//////////////////////////////////////
+  pinMode(heizungPin, OUTPUT);
   mqttClient.setServer(broker, mqqtPort);
   connectMQTT();
+  subscribe();
+  mqttClient.setCallback(heizung);
 }
 
 void loop()
@@ -151,8 +189,8 @@ void loop()
   }
   else
   {
+    mqttClient.loop();
     publish();
   }
-
   delay(1000);
 }
