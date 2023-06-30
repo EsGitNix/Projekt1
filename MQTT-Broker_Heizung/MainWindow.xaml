@@ -24,7 +24,7 @@
     <Window.Resources>
         <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}" >
             <Setter Property="IsEnabled" Value="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"/>
-            <Setter Property="Width" Value="125"/>
+            <Setter Property="Width" Value="135"/>
         </Style>
         <Style TargetType="Line">
             <Setter Property="Stroke" Value="AliceBlue"/>
@@ -71,9 +71,16 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="0.5*"/>
                     </Grid.ColumnDefinitions>
-                    <Button HorizontalAlignment="Left">test</Button>
+                    <Button Grid.Column="1" HorizontalAlignment="Right">Heizung An/Aus</Button>
+                    <materialDesign:Card  HorizontalAlignment="Right" Grid.Column="2" Padding="5" UniformCornerRadius="20" Margin="0 0 0 0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" >Heizung:</TextBlock>
+                            <TextBlock Margin="5 0" VerticalAlignment="Center" Foreground="DarkGray" Text="An/Aus"/> 
+                        </StackPanel>
+                    </materialDesign:Card>
+
                 </Grid>
             </Grid>
             <!--left-->
