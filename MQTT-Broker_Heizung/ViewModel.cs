@@ -10,10 +10,13 @@ using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
+using CommunityToolkit.Mvvm;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace MQTT_Broker_Heizung
 {
-    class ViewModel
+    internal partial class ViewModel : ObservableObject
     {
         public List<ISeries> MeineSerie { get; private set; } // Eigenschaft an die gebunden wird
         public List<ISeries> MeineSerie2 { get; private set; } // Eigenschaft an die gebunden wird
