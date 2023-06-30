@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Ink;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
-using CommunityToolkit.Mvvm;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+using System.Net;
+using System.Windows;
+using HiveMQtt.Client.Options;
+using HiveMQtt.Client;
 
 namespace MQTT_Broker_Heizung
 {
@@ -30,8 +28,35 @@ namespace MQTT_Broker_Heizung
             sinusSerie2.Stroke = new SolidColorPaint(SKColors.Red, 2);
             MeineSerie.Add(sinusSerie);
             MeineSerie2.Add(sinusSerie2);
+            Subscribe();
         }
+        public async void Subscribe()
+        {
+            var hostName = "raspberryFrank";
+            var ipAddress = await Dns.GetHostAddressesAsync(hostName);
+            if (ipAddress.Length == 0)
+            {
+                MessageBox.Show("Host not found.");
+                return;
+            }
+            var options = new HiveMQClientOptions();
+            options.Host = ipAddress[0].ToString();
+            options.Port = 1883;
 
+            var client = new HiveMQClient(options);
+            var connectResult = await client.ConnectAsync().ConfigureAwait(false);
+
+            var topicTemper = await client.SubscribeAsync("/temper").ConfigureAwait(false);
+            var topicHumid = await client.SubscribeAsync("/feucht").ConfigureAwait(false);
+            var topicBatter = await client.SubscribeAsync("/batterie").ConfigureAwait(false);
+
+            client.OnMessageReceived += (sender, e) =>
+            {
+                string topic = e.PublishMessage.Topic;
+                string msg = e.PublishMessage.PayloadAsString;
+
+            };
+        }
         private LineSeries<ObservablePoint> FülleValuesSinus(int anzahl)
         {
             Random rnd = new Random();
