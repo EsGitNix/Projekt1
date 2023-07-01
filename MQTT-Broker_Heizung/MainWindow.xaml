@@ -116,9 +116,9 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <TextBlock HorizontalAlignment="Center">Luftfeuchtigkeit</TextBlock>
-                <lvc:CartesianChart Grid.Row="1" Series="{Binding HumidSerie}" XAxes="{Binding XAxes}"/>
+                <lvc:CartesianChart Grid.Row="1" Series="{Binding HumidSerie}" XAxes="{Binding XAxes}" ZoomMode="Both"/>
                 <TextBlock Grid.Row="2" HorizontalAlignment="Center">Temperatur</TextBlock>
-                <lvc:CartesianChart Grid.Row="3" Series="{Binding TemperSerie}" XAxes="{Binding XAxes}"/>
+                <lvc:CartesianChart Grid.Row="3" Series="{Binding TemperSerie}" XAxes="{Binding XAxes}" ZoomMode="Both"/>
 
 
             </Grid>
