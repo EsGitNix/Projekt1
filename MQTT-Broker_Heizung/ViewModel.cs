@@ -16,6 +16,7 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using System.Globalization;
 using System.IO;
+using static CommunityToolkit.Mvvm.ComponentModel.__Internals.__TaskExtensions.TaskAwaitableWithoutEndValidation;
 
 namespace MQTT_Broker_Heizung
 {
@@ -42,8 +43,8 @@ namespace MQTT_Broker_Heizung
             {
                 Labeler = value => new DateTime((long) value).ToString("HH:mm:ss"),
                 LabelsRotation = 15,
-                UnitWidth = TimeSpan.FromMinutes(5).Ticks, // Die Einheitsbreite auf 30 Minuten einstellen
-            MinStep = TimeSpan.FromMinutes(5).Ticks // Der minimale Schritt auf 1 Stunde einstellen
+                UnitWidth = TimeSpan.FromMinutes(1).Ticks,
+            MinStep = TimeSpan.FromMinutes(1).Ticks
 
         }
 
@@ -60,8 +61,9 @@ namespace MQTT_Broker_Heizung
             LineSeries<DateTimePoint> temperSerie = new LineSeries<DateTimePoint> { Values = TemperValues };
 
             humidSeries.Name = "Luftfeuchtigkeit";
-            humidSeries.GeometrySize = 1;
-            humidSeries.GeometryFill = humidSeries.Stroke;
+            temperSerie.Stroke = new SolidColorPaint(SKColors.LightBlue, 2);
+            humidSeries.GeometrySize = 0.5;
+            humidSeries.GeometryStroke = new SolidColorPaint(SKColors.OrangeRed, 5);
             humidSeries.DataLabelsFormatter = (point) => point.PrimaryValue.ToString("N");
             humidSeries.Fill = null;
 
@@ -69,6 +71,7 @@ namespace MQTT_Broker_Heizung
             temperSerie.Name = "Temperatur";
             temperSerie.Stroke = new SolidColorPaint(SKColors.Red, 2);
             temperSerie.GeometrySize = 0.5;
+            temperSerie.GeometryStroke = new SolidColorPaint(SKColors.AliceBlue, 5);
             temperSerie.DataLabelsFormatter = (point) => point.PrimaryValue.ToString("N");
             temperSerie.Fill = null;
 
@@ -78,8 +81,34 @@ namespace MQTT_Broker_Heizung
             Subscribe();
 
             HeizungCommand = new RelayCommand(HeizungAnAus);
+            CSVCommand = new RelayCommand(ExportDataToCsv);
         }
-
+        private void ExportDataToCsv()
+        {
+            string fileDirectory = @"C:\temp\";
+            ExportToCsv(fileDirectory, "humid.csv", HumidValues, "Luftfeuchtigkeit");
+            ExportToCsv(fileDirectory, "temper.csv", TemperValues, "Temperatur");
+            HumidValues.Clear();
+            TemperValues.Clear();
+            MessageBox.Show("Daten wurden als CSV exportiert.");
+        }
+        private void ExportToCsv(string fileDirectory, string filename, IEnumerable<DateTimePoint> data, string dataHeadline)
+        {
+            var file = Path.Combine(fileDirectory, filename);
+            bool fileExist = File.Exists(file);
+            using (StreamWriter sw = new StreamWriter(file, true))
+            {
+                if (!fileExist)
+                {
+                    sw.WriteLine($"Datum;{dataHeadline}");
+                }
+                foreach (var point in data)
+                {
+                    string line = $"{point.DateTime.ToString("yyyy-MM-dd HH:mm:ss")};{point.Value.ToString()}";
+                    sw.WriteLine(line);
+                }
+            }
+        }
 
         private void HeizungAnAus()
         {
