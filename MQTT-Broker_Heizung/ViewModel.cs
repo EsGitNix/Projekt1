@@ -41,13 +41,18 @@ namespace MQTT_Broker_Heizung
     {
             new Axis
             {
-                Labeler = value => new DateTime((long) value).ToString("HH:mm:ss"),//fehler abfangen
+                Labeler = value =>
+                {
+                    long ticks = (long)value;
+                    if (ticks >= DateTime.MinValue.Ticks && ticks <= DateTime.MaxValue.Ticks)
+                        return new DateTime(ticks).ToString("HH:mm:ss");
+                    else
+                        return "";
+                },
                 LabelsRotation = 15,
                 UnitWidth = TimeSpan.FromMinutes(1).Ticks,
-            MinStep = TimeSpan.FromMinutes(1).Ticks
-
-        }
-
+                MinStep = TimeSpan.FromMinutes(1).Ticks
+            }
         };
 
         public ViewModel()
