@@ -74,6 +74,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="0.5*"/>
                     </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" HorizontalAlignment="Center" Command="{Binding CSVCommand}" >Werte Speichern</Button>
                     <Button Grid.Column="2" HorizontalAlignment="Right" Command="{Binding HeizungCommand}" >Heizung An/Aus</Button>
                     <materialDesign:Card  HorizontalAlignment="Right" Grid.Column="3" Padding="5" UniformCornerRadius="20" Margin="0 0 0 0">
                         <StackPanel Orientation="Horizontal">
@@ -103,8 +104,7 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <Button>test</Button>
+                    </Grid.RowDefinitions>                    
                 </Grid>
             </Grid>
             <!--center-->
@@ -116,11 +116,9 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <TextBlock HorizontalAlignment="Center">Luftfeuchtigkeit</TextBlock>
-                <lvc:CartesianChart Grid.Row="1" Series="{Binding HumidSerie}" />
-
-
+                <lvc:CartesianChart Grid.Row="1" Series="{Binding HumidSerie}" XAxes="{Binding XAxes}"/>
                 <TextBlock Grid.Row="2" HorizontalAlignment="Center">Temperatur</TextBlock>
-                <lvc:CartesianChart Grid.Row="3" Series="{Binding TemperSerie}"/>
+                <lvc:CartesianChart Grid.Row="3" Series="{Binding TemperSerie}" XAxes="{Binding XAxes}"/>
 
 
             </Grid>

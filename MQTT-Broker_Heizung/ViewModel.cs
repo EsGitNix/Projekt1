@@ -15,12 +15,15 @@ using System.Text;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using System.Globalization;
+using System.IO;
 
 namespace MQTT_Broker_Heizung
 {
-    internal partial class ViewModel : ObservableObject
+    [ObservableObject]
+    internal partial class ViewModel
     {
         public ICommand HeizungCommand { get; private set; }
+        public ICommand CSVCommand { get; private set; }
         public List<ISeries> HumidSerie { get; private set; }
         public ObservableCollection<DateTimePoint> HumidValues { get; private set; }
         public List<ISeries> TemperSerie { get; private set; }
@@ -32,6 +35,19 @@ namespace MQTT_Broker_Heizung
         bool _heizungStatus;
         [ObservableProperty]
         int _batterie;
+
+        public Axis[] XAxes { get; set; } =
+    {
+            new Axis
+            {
+                Labeler = value => new DateTime((long) value).ToString("HH:mm:ss"),
+                LabelsRotation = 15,
+                UnitWidth = TimeSpan.FromMinutes(5).Ticks, // Die Einheitsbreite auf 30 Minuten einstellen
+            MinStep = TimeSpan.FromMinutes(5).Ticks // Der minimale Schritt auf 1 Stunde einstellen
+
+        }
+
+        };
 
         public ViewModel()
         {
@@ -60,8 +76,10 @@ namespace MQTT_Broker_Heizung
             HumidSerie.Add(humidSeries);
             TemperSerie.Add(temperSerie);
             Subscribe();
+
             HeizungCommand = new RelayCommand(HeizungAnAus);
         }
+
 
         private void HeizungAnAus()
         {
@@ -132,41 +150,7 @@ namespace MQTT_Broker_Heizung
         }
 
 
-        private LineSeries<ObservablePoint> FülleValuesSinus(int anzahl)
-        {
-            Random rnd = new Random();
-            double offset = rnd.NextDouble() + 0.5;
-            double amplitude = 10.0 * offset;
-            const double frequency = 50.0;
-            const double periodendauer = 1.0 / frequency;
-            double schrittweite = periodendauer / (anzahl - 1);
 
-            var sinusWerte = new ObservableCollection<ObservablePoint>();
-
-            double t = 0;
-            for (int i = 0; i < anzahl; i++)
-            {
-                double wert = amplitude * Math.Sin(2 * Math.PI * frequency * t);
-                sinusWerte.Add(new ObservablePoint(t * 1000, wert));
-                t += schrittweite;
-            }
-
-            var lSerie = new LineSeries<ObservablePoint>();
-            lSerie.Name = "Sinus";
-            lSerie.Fill = null;
-            //  lSerie.Stroke = new SolidColorPaint(SKColors.Blue, 2);
-            lSerie.GeometryFill = null;
-            //   lSerie.GeometryStroke = new SolidColorPaint(SKColors.Red, 1);
-            lSerie.GeometrySize = 25;
-            lSerie.Values = sinusWerte;
-
-            lSerie.DataLabelsSize = 20;
-            lSerie.DataLabelsPaint = new SolidColorPaint(SKColors.Blue);
-            lSerie.DataLabelsPosition = LiveChartsCore.Measure.DataLabelsPosition.Top;
-            lSerie.DataLabelsFormatter = (point) => point.PrimaryValue.ToString("N");
-
-            return lSerie;
-        }
 
 
 
