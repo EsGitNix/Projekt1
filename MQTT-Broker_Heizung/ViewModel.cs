@@ -41,7 +41,7 @@ namespace MQTT_Broker_Heizung
     {
             new Axis
             {
-                Labeler = value => new DateTime((long) value).ToString("HH:mm:ss"),
+                Labeler = value => new DateTime((long) value).ToString("HH:mm:ss"),//fehler abfangen
                 LabelsRotation = 15,
                 UnitWidth = TimeSpan.FromMinutes(1).Ticks,
             MinStep = TimeSpan.FromMinutes(1).Ticks
@@ -85,28 +85,41 @@ namespace MQTT_Broker_Heizung
         }
         private void ExportDataToCsv()
         {
+            string msg = "Daten wurden als CSV exportiert.\n";
             string fileDirectory = @"C:\temp\";
-            ExportToCsv(fileDirectory, "humid.csv", HumidValues, "Luftfeuchtigkeit");
-            ExportToCsv(fileDirectory, "temper.csv", TemperValues, "Temperatur");
-            HumidValues.Clear();
-            TemperValues.Clear();
-            MessageBox.Show("Daten wurden als CSV exportiert.");
+
+            if (ExportToCsv(fileDirectory, "humid.csv", HumidValues, "Luftfeuchtigkeit")) HumidValues.Clear();
+            else msg += "\nLuftfeuchtigkeit konnte nicht exportiert werden";
+
+            if (ExportToCsv(fileDirectory, "temper.csv", TemperValues, "Temperatur")) TemperValues.Clear();
+            else msg += "\nTemperatur konnte nicht exportiert werden";
+
+            MessageBox.Show(msg);
         }
-        private void ExportToCsv(string fileDirectory, string filename, IEnumerable<DateTimePoint> data, string dataHeadline)
+        private bool ExportToCsv(string fileDirectory, string filename, IEnumerable<DateTimePoint> data, string dataHeadline)
         {
             var file = Path.Combine(fileDirectory, filename);
             bool fileExist = File.Exists(file);
-            using (StreamWriter sw = new StreamWriter(file, true))
+            try
             {
-                if (!fileExist)
+                using (StreamWriter sw = new StreamWriter(file, true))
                 {
-                    sw.WriteLine($"Datum;{dataHeadline}");
+                    if (!fileExist)
+                    {
+                        sw.WriteLine($"Datum;{dataHeadline}");
+                    }
+                    foreach (var point in data)
+                    {
+                        string line = $"{point.DateTime.ToString("yyyy-MM-dd HH:mm:ss")};{point.Value.ToString()}";
+                        sw.WriteLine(line);
+                    }
                 }
-                foreach (var point in data)
-                {
-                    string line = $"{point.DateTime.ToString("yyyy-MM-dd HH:mm:ss")};{point.Value.ToString()}";
-                    sw.WriteLine(line);
-                }
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+
             }
         }
 
