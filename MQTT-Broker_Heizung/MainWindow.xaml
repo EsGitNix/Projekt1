@@ -56,11 +56,11 @@
                     x:Name="DeterminateCircularProgress"
                     Style="{StaticResource MaterialDesignCircularProgressBar}"
                     Foreground="GreenYellow"    
-                    Value="70"  Background="Gray" />
+                    Value="{Binding Batterie}"  Background="Gray" />
                         </materialDesign:Card>
-                        <TextBlock Grid.Row="1" HorizontalAlignment="Center" Margin="0 2">
-                        66%
-                        </TextBlock>
+                        <TextBlock Grid.Row="1" HorizontalAlignment="Center" Margin="0 2" Text="{Binding Batterie,StringFormat={}{0}%}"/>
+
+
                     </Grid>
                 </Grid>
             </Grid>
@@ -71,13 +71,14 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="0.5*"/>
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="1" HorizontalAlignment="Right">Heizung An/Aus</Button>
-                    <materialDesign:Card  HorizontalAlignment="Right" Grid.Column="2" Padding="5" UniformCornerRadius="20" Margin="0 0 0 0">
+                    <Button Grid.Column="2" HorizontalAlignment="Right" Command="{Binding HeizungCommand}" >Heizung An/Aus</Button>
+                    <materialDesign:Card  HorizontalAlignment="Right" Grid.Column="3" Padding="5" UniformCornerRadius="20" Margin="0 0 0 0">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock VerticalAlignment="Center" >Heizung:</TextBlock>
-                            <TextBlock Margin="5 0" VerticalAlignment="Center" Foreground="DarkGray" Text="An/Aus"/> 
+                            <TextBlock x:Name="HeizungStatusTextBlock" Margin="5 0" VerticalAlignment="Center" Foreground="{Binding HeizungStatusForeground}" Text="{Binding HeizungStatusText}"/>
                         </StackPanel>
                     </materialDesign:Card>
 
@@ -115,9 +116,13 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <TextBlock HorizontalAlignment="Center">Luftfeuchtigkeit</TextBlock>
-                <lvc:CartesianChart Grid.Row="1" Series="{Binding MeineSerie}" ZoomMode="Both"/>
+                <lvc:CartesianChart Grid.Row="1" Series="{Binding HumidSerie}" />
+
+
                 <TextBlock Grid.Row="2" HorizontalAlignment="Center">Temperatur</TextBlock>
-                <lvc:CartesianChart Grid.Row="3" Series="{Binding MeineSerie2}" ZoomMode="Both"/>
+                <lvc:CartesianChart Grid.Row="3" Series="{Binding TemperSerie}"/>
+
+
             </Grid>
         </DockPanel>
     </Grid>

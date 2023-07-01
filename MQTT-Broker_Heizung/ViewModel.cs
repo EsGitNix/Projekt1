@@ -9,27 +9,78 @@ using SkiaSharp;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Net;
 using System.Windows;
-using HiveMQtt.Client.Options;
-using HiveMQtt.Client;
+using uPLibrary.Networking.M2Mqtt;
+using uPLibrary.Networking.M2Mqtt.Messages;
+using System.Text;
+using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
+using System.Globalization;
 
 namespace MQTT_Broker_Heizung
 {
     internal partial class ViewModel : ObservableObject
     {
-        public List<ISeries> MeineSerie { get; private set; } // Eigenschaft an die gebunden wird
-        public List<ISeries> MeineSerie2 { get; private set; } // Eigenschaft an die gebunden wird
+        public ICommand HeizungCommand { get; private set; }
+        public List<ISeries> HumidSerie { get; private set; }
+        public ObservableCollection<DateTimePoint> HumidValues { get; private set; }
+        public List<ISeries> TemperSerie { get; private set; }
+        public ObservableCollection<DateTimePoint> TemperValues { get; private set; }
+
+        static MqttClient client;
+
+        [ObservableProperty]
+        bool _heizungStatus;
+        [ObservableProperty]
+        int _batterie;
 
         public ViewModel()
         {
-            MeineSerie = new List<ISeries>(); // Hier im Demo nur eine Serie
-            MeineSerie2 = new List<ISeries>(); // Hier im Demo nur eine Serie
-            LineSeries<ObservablePoint> sinusSerie = FülleValuesSinus(9);
-            LineSeries<ObservablePoint> sinusSerie2 = FülleValuesSinus(13);
-            sinusSerie2.Stroke = new SolidColorPaint(SKColors.Red, 2);
-            MeineSerie.Add(sinusSerie);
-            MeineSerie2.Add(sinusSerie2);
+            HumidSerie = new List<ISeries>();
+            HumidValues = new ObservableCollection<DateTimePoint>();
+            LineSeries<DateTimePoint> humidSeries = new LineSeries<DateTimePoint> { Values = HumidValues };
+
+            TemperSerie = new List<ISeries>();
+            TemperValues = new ObservableCollection<DateTimePoint>();
+            LineSeries<DateTimePoint> temperSerie = new LineSeries<DateTimePoint> { Values = TemperValues };
+
+            humidSeries.Name = "Luftfeuchtigkeit";
+            humidSeries.GeometrySize = 1;
+            humidSeries.GeometryFill = humidSeries.Stroke;
+            humidSeries.DataLabelsFormatter = (point) => point.PrimaryValue.ToString("N");
+            humidSeries.Fill = null;
+
+
+            temperSerie.Name = "Temperatur";
+            temperSerie.Stroke = new SolidColorPaint(SKColors.Red, 2);
+            temperSerie.GeometrySize = 0.5;
+            temperSerie.DataLabelsFormatter = (point) => point.PrimaryValue.ToString("N");
+            temperSerie.Fill = null;
+
+
+            HumidSerie.Add(humidSeries);
+            TemperSerie.Add(temperSerie);
             Subscribe();
+            HeizungCommand = new RelayCommand(HeizungAnAus);
         }
+
+        private void HeizungAnAus()
+        {
+            if (HeizungStatus == true)
+            {
+                Publish("/heizung", "0");
+                HeizungStatus = false;
+
+            }
+            else
+            {
+                Publish("/heizung", "1");
+                HeizungStatus = true;
+            }
+            OnPropertyChanged(nameof(HeizungStatusText));
+            OnPropertyChanged(nameof(HeizungStatusForeground));
+        }
+        public string HeizungStatusText => HeizungStatus ? "An" : "Aus";
+        public string HeizungStatusForeground => HeizungStatus ? "YellowGreen" : "OrangeRed";
         public async void Subscribe()
         {
             var hostName = "raspberryFrank";
@@ -39,24 +90,48 @@ namespace MQTT_Broker_Heizung
                 MessageBox.Show("Host not found.");
                 return;
             }
-            var options = new HiveMQClientOptions();
-            options.Host = ipAddress[0].ToString();
-            options.Port = 1883;
-
-            var client = new HiveMQClient(options);
-            var connectResult = await client.ConnectAsync().ConfigureAwait(false);
-
-            var topicTemper = await client.SubscribeAsync("/temper").ConfigureAwait(false);
-            var topicHumid = await client.SubscribeAsync("/feucht").ConfigureAwait(false);
-            var topicBatter = await client.SubscribeAsync("/batterie").ConfigureAwait(false);
-
-            client.OnMessageReceived += (sender, e) =>
-            {
-                string topic = e.PublishMessage.Topic;
-                string msg = e.PublishMessage.PayloadAsString;
-
-            };
+            client = new MqttClient(ipAddress[0]);
+            client.MqttMsgPublishReceived += clientMsgRecieved;
+            string clientId = Guid.NewGuid().ToString();
+            client.Connect(clientId);
+            client.Subscribe(new string[] { "#" }, new byte[] { MqttMsgBase.QOS_LEVEL_EXACTLY_ONCE });
         }
+
+        void clientMsgRecieved(object sender, MqttMsgPublishEventArgs e)
+        {
+            string str = System.Text.Encoding.ASCII.GetString(e.Message);
+            switch (e.Topic)
+            {
+                case "/batterie":
+                    double batterie;
+                    double.TryParse(str, NumberStyles.Number, CultureInfo.InvariantCulture, out batterie);
+                    Batterie = Convert.ToInt16(Math.Round(batterie, 0));
+                    break;
+
+                case "/feucht":
+                    double humidity;
+                    double.TryParse(str, NumberStyles.Number, CultureInfo.InvariantCulture, out humidity);
+                    DateTimePoint humidPoint = new DateTimePoint(DateTime.Now, humidity);
+                    HumidValues.Add(humidPoint);
+                    break;
+
+                case "/temper":
+                    double temper;
+                    double.TryParse(str, NumberStyles.Number, CultureInfo.InvariantCulture, out temper);
+                    DateTimePoint temperPoint = new DateTimePoint(DateTime.Now, temper);
+                    TemperValues.Add(temperPoint);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+        void Publish(string topic, string payload)
+        {
+            client.Publish(topic, Encoding.UTF8.GetBytes(payload), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+        }
+
+
         private LineSeries<ObservablePoint> FülleValuesSinus(int anzahl)
         {
             Random rnd = new Random();

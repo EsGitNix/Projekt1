@@ -39,11 +39,11 @@ const char *topicTemper = "/temper";
 const char *topicBattery = "/batterie";
 bool heizungAn = false;
 
-float batteryPercantage()
+float batteryPercentage()
 {
   int input = (analogRead(batteryPin));
-  float percantage = map(input, 0, 4095, 0.0, 100.00);
-  return percantage;
+  float percentage = map(input, 0, 4095, 0.0, 100.00);
+  return percentage;
 }
 
 String localTime()
@@ -124,7 +124,7 @@ void connectMQTT()
       Serial.println("Connecting mqtt... ");
       mqttClient.connect("ESP32");
       mqttClient.subscribe(topicHeizung);
-      delay(500);
+      delay(1000);
     }
     else
     {
@@ -135,12 +135,14 @@ void connectMQTT()
 }
 void publish()
 {
-  String batt = String(batteryPercantage(), 2);
+  String batt = String(batteryPercentage(), 2);
   String hum = String(humidity, 2);
   String temper = String(temperature, 2);
+  String heiz = String(digitalRead(heizungPin));
   mqttClient.publish(topicBattery, batt.c_str());
   mqttClient.publish(topicHumid, hum.c_str());
   mqttClient.publish(topicTemper, temper.c_str());
+  // mqttClient.publish(topicHeizung, heiz.c_str());
 }
 void setup()
 {
@@ -181,7 +183,7 @@ void loop()
   showSCrn();
   String dataString = localTime() + csvSperator + temperature + csvSperator + humidity;
   Serial.println(dataString);
-  Serial.println(batteryPercantage());
+  Serial.println(batteryPercentage());
 
   if (!mqttClient.connected())
   {
@@ -192,5 +194,5 @@ void loop()
     mqttClient.loop();
     publish();
   }
-  delay(1000);
+  delay(1 * 1000);
 }
