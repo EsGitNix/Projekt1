@@ -194,5 +194,5 @@ void loop()
     mqttClient.loop();
     publish();
   }
-  delay(1 * 60 * 1000);
+  delay(0.5 * 60 * 1000);
 }
