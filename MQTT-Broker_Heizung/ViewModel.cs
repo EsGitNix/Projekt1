@@ -149,13 +149,13 @@ namespace MQTT_Broker_Heizung
         public async void Subscribe()
         {
             var hostName = "raspberryFrank";
-            var ipAddress = await Dns.GetHostAddressesAsync(hostName);
-            if (ipAddress.Length == 0)
-            {
-                MessageBox.Show("Host not found.");
-                return;
-            }
-            client = new MqttClient(ipAddress[0]);
+            //   var ipAddress = await Dns.GetHostAddressesAsync(hostName);
+            //if (ipAddress.Length == 0)
+            //{
+            //    MessageBox.Show("Host not found.");
+            //    return;
+            //}
+            client = new MqttClient("192.168.68.105");//ipAddress[0]);            
             client.MqttMsgPublishReceived += clientMsgRecieved;
             string clientId = Guid.NewGuid().ToString();
             client.Connect(clientId);

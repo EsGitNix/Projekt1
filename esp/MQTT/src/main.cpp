@@ -31,7 +31,7 @@ char csvSperator = ';';
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 const int mqqtPort = 1883;
-const char *broker = "192.168.68.109";
+const char *broker = "192.168.68.105";
 
 const char *topicHeizung = "/heizung";
 const char *topicHumid = "/feucht";
@@ -185,6 +185,15 @@ void loop()
   Serial.println(dataString);
   Serial.println(batteryPercentage());
 
+  if (!WiFi.isConnected())
+  {
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED)
+    {
+      delay(1000);
+      Serial.println("Connecting to WiFi...");
+    }
+  }
   if (!mqttClient.connected())
   {
     connectMQTT();
