@@ -121,7 +121,7 @@
                     <TextBlock Grid.Row="3" HorizontalAlignment="Center" VerticalAlignment="Top" Text="{Binding MaxHumid}" Foreground="LightBlue"/>
                     <TextBlock Grid.Row="4" HorizontalAlignment="Center" VerticalAlignment="Bottom">Min. Luftfeuchtigkeit</TextBlock>
                     <TextBlock Grid.Row="5" HorizontalAlignment="Center" VerticalAlignment="Top" Text="{Binding MinHumid}" Foreground="LightBlue"/>
-
+                    <Separator Grid.Row="6"/>
                     <TextBlock Grid.Row="7" HorizontalAlignment="Center" VerticalAlignment="Bottom">Aktuelle Temperatur</TextBlock>
                     <TextBlock Grid.Row="8" HorizontalAlignment="Center" VerticalAlignment="Top" Text="{Binding AktTemp}" Foreground="Red"/>
                     <TextBlock Grid.Row="9" HorizontalAlignment="Center" VerticalAlignment="Bottom">Max. Temperatur</TextBlock>
