@@ -10,8 +10,8 @@
 #include <esp32-hal-timer.h>
 #include <TFT_eSPI.h>
 
-const char *ssid = "Mesh Igel";        //"ASUSJC";
-const char *password = "rhQ6WbSbE8Rv"; //"123456789";
+const char *ssid = "ASUSJC";        // "Mesh Igel";        //"ASUSJC";
+const char *password = "123456789"; //"rhQ6WbSbE8Rv"; //"123456789";
 
 const int dhtpin = 25;
 const int batteryPin = 39;
@@ -31,7 +31,11 @@ char csvSperator = ';';
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 const int mqqtPort = 1883;
+<<<<<<< HEAD
 const char *broker = "192.168.68.105";
+=======
+const char *broker = "192.168.2.107"; //"192.168.68.109";
+>>>>>>> 32134caa4e6035ca9bfd3aaa7f32d9ee4270e987
 
 const char *topicHeizung = "/heizung";
 const char *topicHumid = "/feucht";
@@ -203,5 +207,5 @@ void loop()
     mqttClient.loop();
     publish();
   }
-  delay(10 * 1000);
+  delay(5 * 1000);
 }

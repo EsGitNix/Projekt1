@@ -36,6 +36,18 @@ namespace MQTT_Broker_Heizung
         bool _heizungStatus;
         [ObservableProperty]
         int _batterie;
+        [ObservableProperty]
+        double _aktHumid;
+        [ObservableProperty]
+        double _aktTemp;
+        [ObservableProperty]
+        double _maxHumid;
+        [ObservableProperty]
+        double _maxTemp;
+        [ObservableProperty]
+        double _minHumid=999;
+        [ObservableProperty]
+        double _minTemp=999;
 
         public Axis[] XAxes { get; set; } =
     {
@@ -176,6 +188,10 @@ namespace MQTT_Broker_Heizung
                 case "/feucht":
                     double humidity;
                     double.TryParse(str, NumberStyles.Number, CultureInfo.InvariantCulture, out humidity);
+                    AktHumid = humidity;
+                    if (humidity > MaxHumid) MaxHumid = humidity;
+                    if (humidity < MinHumid) MinHumid = humidity;
+
                     DateTimePoint humidPoint = new DateTimePoint(DateTime.Now, humidity);
                     HumidValues.Add(humidPoint);
                     break;
@@ -183,6 +199,9 @@ namespace MQTT_Broker_Heizung
                 case "/temper":
                     double temper;
                     double.TryParse(str, NumberStyles.Number, CultureInfo.InvariantCulture, out temper);
+                    AktTemp = temper;
+                    if (temper > MaxTemp) MaxTemp = temper;
+                    if (temper < MinTemp) MinTemp = temper;
                     DateTimePoint temperPoint = new DateTimePoint(DateTime.Now, temper);
                     TemperValues.Add(temperPoint);
                     break;
