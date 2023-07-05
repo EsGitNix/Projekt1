@@ -212,7 +212,7 @@ void loop()
     if (publish())
     {
       lastMillis=millis();
-      while (lastMillis-millis()<=wait)
+      while (millis() - lastMillis <= wait)
       {
         /* warten */
       }    
