@@ -184,6 +184,7 @@ void setup()
   connectMQTT();
   subscribe();
   mqttClient.setCallback(heizung);
+  lastMillis = millis();
 }
 
 void loop()
@@ -210,7 +211,7 @@ void loop()
   {
     mqttClient.loop();
     if (millis() - lastMillis >= wait)
-    lastMillis = millis();
+
       if (publish())
       {
         {
