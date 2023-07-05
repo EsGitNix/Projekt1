@@ -209,17 +209,17 @@ void loop()
   else
   {
     mqttClient.loop();
-    if (publish())
-    {
-      lastMillis=millis();
-      while (millis() - lastMillis <= wait)
+    lastMillis = millis();
+    if (millis() - lastMillis >= wait)
+      if (publish())
       {
-        /* warten */
-      }    
-      esp_sleep_enable_timer_wakeup(10 * 1000000); // 10 Sekunden = 10 Millionen Mikrosekunden
-      Serial.println("sleeping...");
-      Serial.flush();
-      esp_deep_sleep_start();
-    }
+        {
+          esp_sleep_enable_timer_wakeup(10 * 1000000); // 10 Sekunden = 10 Millionen Mikrosekunden
+          Serial.println("sleeping...");
+          Serial.flush();
+          esp_deep_sleep_start();
+        }
+        delay(1000);
+      }
   }
 }
