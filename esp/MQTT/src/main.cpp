@@ -209,8 +209,8 @@ void loop()
   else
   {
     mqttClient.loop();
-    lastMillis = millis();
     if (millis() - lastMillis >= wait)
+    lastMillis = millis();
       if (publish())
       {
         {
