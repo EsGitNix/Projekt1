@@ -219,7 +219,7 @@ void loop()
           Serial.flush();
           esp_deep_sleep_start();
         }
-        delay(1000);
       }
   }
+  delay(1000);
 }
