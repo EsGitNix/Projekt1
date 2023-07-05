@@ -10,8 +10,8 @@
 #include <esp32-hal-timer.h>
 #include <TFT_eSPI.h>
 
-const char *ssid = "ASUSJC";        // "Mesh Igel";        //"ASUSJC";
-const char *password = "123456789"; //"rhQ6WbSbE8Rv"; //"123456789";
+const char *ssid = "Mesh Igel";        // "Mesh Igel";        //"ASUSJC";
+const char *password = "rhQ6WbSbE8Rv"; //"rhQ6WbSbE8Rv"; //"123456789";
 
 const int dhtpin = 25;
 const int batteryPin = 39;
@@ -31,13 +31,16 @@ char csvSperator = ';';
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
 const int mqqtPort = 1883;
-const char *broker = "192.168.2.107"; //"192.168.68.109";
+const char *broker = "192.168.68.105";
 
 const char *topicHeizung = "/heizung";
 const char *topicHumid = "/feucht";
 const char *topicTemper = "/temper";
 const char *topicBattery = "/batterie";
 bool heizungAn = false;
+
+unsigned long lastMillis = 0;
+unsigned long wait = 5000;
 
 float batteryPercentage()
 {
@@ -133,15 +136,20 @@ void connectMQTT()
   }
   Serial.println("Connecting failed");
 }
-void publish()
+bool publish()
 {
   String batt = String(batteryPercentage(), 2);
   String hum = String(humidity, 2);
   String temper = String(temperature, 2);
   String heiz = String(digitalRead(heizungPin));
-  mqttClient.publish(topicBattery, batt.c_str());
-  mqttClient.publish(topicHumid, hum.c_str());
-  mqttClient.publish(topicTemper, temper.c_str());
+  bool success;
+  success =
+      mqttClient.publish(topicBattery, batt.c_str()) &&
+      mqttClient.publish(topicHumid, hum.c_str()) &&
+      mqttClient.publish(topicTemper, temper.c_str());
+  while (!success)
+    ;
+  return true;
   // mqttClient.publish(topicHeizung, heiz.c_str());
 }
 void setup()
@@ -176,6 +184,7 @@ void setup()
   connectMQTT();
   subscribe();
   mqttClient.setCallback(heizung);
+  lastMillis = millis();
 }
 
 void loop()
@@ -185,6 +194,15 @@ void loop()
   Serial.println(dataString);
   Serial.println(batteryPercentage());
 
+  if (!WiFi.isConnected())
+  {
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED)
+    {
+      delay(1000);
+      Serial.println("Connecting to WiFi...");
+    }
+  }
   if (!mqttClient.connected())
   {
     connectMQTT();
@@ -192,7 +210,17 @@ void loop()
   else
   {
     mqttClient.loop();
-    publish();
+    if (millis() - lastMillis >= wait)
+
+      if (publish())
+      {
+        {
+          esp_sleep_enable_timer_wakeup(10 * 1000000); // 10 Sekunden = 10 Millionen Mikrosekunden
+          Serial.println("sleeping...");
+          Serial.flush();
+          esp_deep_sleep_start();
+        }
+      }
   }
-  delay(5 * 1000);
+  delay(1000);
 }
