@@ -39,6 +39,9 @@ const char *topicTemper = "/temper";
 const char *topicBattery = "/batterie";
 bool heizungAn = false;
 
+unsigned long lastMillis = 0;
+unsigned long wait = 5000;
+
 float batteryPercentage()
 {
   int input = (analogRead(batteryPin));
@@ -208,13 +211,15 @@ void loop()
     mqttClient.loop();
     if (publish())
     {
-      delay(5 * 1000);
-      
+      lastMillis=millis();
+      while (lastMillis-millis()<=wait)
+      {
+        /* warten */
+      }    
       esp_sleep_enable_timer_wakeup(10 * 1000000); // 10 Sekunden = 10 Millionen Mikrosekunden
       Serial.println("sleeping...");
       Serial.flush();
       esp_deep_sleep_start();
-      
     }
   }
 }
